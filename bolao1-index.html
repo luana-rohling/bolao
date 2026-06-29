@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolão · Brasil x Japão</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0f14;--bg2:#12151c;--surf:#161a23;--surf2:#1b2030;
+    --line:#262c3a;--txt:#eef1f7;--mut:#8a93a7;--mut2:#5b6478;
+    --brand:#00d56a;--brand2:#00b85a;--accent:#ffb020;
+    --br:#00d56a;--jp:#ff5a6a;
+    --crav:#00d56a;--perto:#ffb020;--errou:#5b6478;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--txt);min-height:100vh;
+    background:var(--bg);background-image:radial-gradient(900px 420px at 50% -5%,rgba(0,213,106,.07),transparent 65%);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:24px 18px 60px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Sora';font-weight:700;font-size:15px;letter-spacing:.3px}
+  .brand .ic{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;font-size:16px}
+  .live{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--mut);background:var(--surf);border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+  .live .pulse{width:7px;height:7px;border-radius:50%;background:#ff4d5e;animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,77,94,.5)}70%{box-shadow:0 0 0 7px rgba(255,77,94,0)}100%{box-shadow:0 0 0 0 rgba(255,77,94,0)}}
+
+  /* HERO / PLACAR OFICIAL */
+  .hero{background:linear-gradient(180deg,var(--surf),var(--bg2));border:1px solid var(--line);border-radius:20px;padding:8px;position:relative;overflow:hidden}
+  .hero-tag{display:flex;justify-content:center;align-items:center;gap:8px;padding:14px 0 4px}
+  .chip{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.25);padding:5px 14px;border-radius:999px}
+  .lockchip{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);background:var(--bg);border:1px solid var(--line);padding:5px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+  .official-label{text-align:center;font-family:'Sora';font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut2);margin:8px 0 -2px}
+  .match{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;padding:10px 22px 8px}
+  .team{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .flag-svg{width:64px;height:44px;border-radius:7px;box-shadow:0 4px 14px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08)}
+  .team .nm{font-family:'Sora';font-weight:700;font-size:18px;letter-spacing:.3px;color:#fff}
+  .scoreblock{display:flex;align-items:center;gap:10px}
+  .scorenum{font-family:'Sora';font-weight:800;font-size:56px;line-height:1;background:var(--bg);border:1px solid var(--line);border-radius:14px;width:88px;height:96px;display:flex;align-items:center;justify-content:center;color:#fff;letter-spacing:-1px;transition:.2s}
+  .scorenum.locked{cursor:default}
+  .scorenum.editable{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,176,32,.15)}
+  .scorenum input{all:unset;width:100%;height:100%;text-align:center;font:inherit;color:inherit}
+  .scorenum input:disabled{cursor:default;color:#fff;-webkit-text-fill-color:#fff;opacity:1}
+  .scorenum input::placeholder{color:var(--mut2)}
+  .dash{color:var(--mut2);font-family:'Sora';font-weight:700;font-size:22px}
+  .hero-foot{text-align:center;padding:8px 18px 16px;color:var(--mut);font-size:12.5px;font-weight:500}
+  .hero-foot b{color:var(--txt)}
+  .hero-foot .hint{display:block;margin-top:6px;color:var(--mut2);font-size:11.5px}
+  /* barra admin */
+  .adminbar{display:none;align-items:center;justify-content:center;gap:10px;padding:12px;margin:6px 8px 10px;background:rgba(255,176,32,.07);border:1px dashed rgba(255,176,32,.35);border-radius:12px;font-size:12.5px;color:var(--accent);font-weight:600}
+  .adminbar.on{display:flex;flex-wrap:wrap}
+  .adminbar button{font-size:12px;padding:8px 14px}
+
+  .sec{display:flex;align-items:center;gap:10px;margin:30px 4px 14px}
+  .sec h2{font-family:'Sora';font-size:15px;font-weight:700;letter-spacing:.3px}
+  .sec .bar{width:4px;height:16px;background:var(--brand);border-radius:2px}
+
+  .config{margin:16px 0}
+  .config details summary{cursor:pointer;color:var(--mut);font-size:12.5px;font-weight:600;list-style:none;display:flex;align-items:center;gap:6px}
+  .config details summary::-webkit-details-marker{display:none}
+  .config input{width:100%;background:var(--surf);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:11px 13px;margin-top:10px;font-size:13px;font-family:'Inter'}
+  .config .hintcfg{font-size:11.5px;color:var(--mut2);margin-top:8px;line-height:1.5}
+
+  /* FORM PALPITE - destaque forte */
+  .card-form{background:var(--surf);border:2px solid var(--brand);border-radius:16px;padding:22px;position:relative;box-shadow:0 0 0 4px rgba(0,213,106,.08)}
+  .form-head{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+  .form-head .pin{font-size:18px}
+  .form-head h3{font-family:'Sora';font-size:17px;font-weight:700}
+  .form-head .seu{color:var(--brand)}
+  .form-grid{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:8px}
+  .field label{font-size:11.5px;font-weight:600;color:var(--mut);letter-spacing:.3px}
+  .field input{background:var(--bg);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:13px 14px;font-size:14.5px;font-family:'Inter';transition:.15s}
+  .field input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(0,213,106,.12)}
+  .field.nome{flex:1;min-width:200px}.field.nome input{width:100%}
+  .field.gol input{width:72px;text-align:center;font-family:'Sora';font-size:24px;font-weight:700;height:56px}
+  .teamtag{display:flex;align-items:center;gap:7px;align-self:flex-end;padding-bottom:15px;font-family:'Sora';font-weight:700;font-size:14px;color:var(--mut)}
+  .flag-mini{width:26px;height:18px;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08)}
+  .vs{align-self:flex-end;padding-bottom:18px;color:var(--mut2);font-family:'Sora';font-weight:700;font-size:16px}
+  button{cursor:pointer;font-family:'Sora';font-weight:700;letter-spacing:.3px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#04130a;border:none;padding:14px 24px;border-radius:11px;font-size:14.5px;transition:.15s;box-shadow:0 4px 14px rgba(0,213,106,.25)}
+  button:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,213,106,.35)}
+  button:active{transform:translateY(0)}
+  button.ghost{background:var(--surf);color:var(--txt);border:1px solid var(--line);box-shadow:none;font-size:13px;padding:9px 16px}
+  button.ghost:hover{border-color:var(--brand);background:var(--surf2)}
+  button.amber{background:linear-gradient(135deg,var(--accent),#e89c00);color:#1c1200;box-shadow:0 4px 14px rgba(255,176,32,.25)}
+  .msg{font-size:13.5px;margin-top:14px;font-weight:600}
+  .msg.ok{color:var(--brand)}.msg.err{color:var(--jp)}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+  @media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+  .stat .n{font-family:'Sora';font-size:30px;font-weight:800;line-height:1;letter-spacing:-.5px}
+  .stat .l{font-size:11px;color:var(--mut);margin-top:6px;font-weight:600;letter-spacing:.3px}
+
+  .grupos{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:720px){.grupos{grid-template-columns:1fr}}
+  .gcol{background:var(--surf);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .gcol .ghead{display:flex;align-items:center;gap:9px;padding:15px 16px;border-bottom:1px solid var(--line);font-family:'Sora';font-weight:700;font-size:14px}
+  .gcol .gdot{width:9px;height:9px;border-radius:50%}
+  .gcol.crav .gdot{background:var(--crav)}.gcol.perto .gdot{background:var(--perto)}.gcol.errou .gdot{background:var(--errou)}
+  .gcol.crav .ghead{color:var(--crav)}.gcol.perto .ghead{color:var(--perto)}.gcol.errou .ghead{color:var(--mut)}
+  .gcol .count{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--txt);background:var(--bg);border:1px solid var(--line);min-width:26px;text-align:center;padding:2px 8px;border-radius:999px}
+  .gcol ul{list-style:none;padding:10px;display:flex;flex-direction:column;gap:6px}
+  .gcol li{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:13.5px;font-weight:600;color:var(--txt)}
+  .gcol .vazio{color:var(--mut2);font-size:12.5px;padding:10px 12px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:14px}
+  .card{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative;transition:.16s}
+  .card:hover{background:var(--surf2);transform:translateY(-2px)}
+  .card .name{font-family:'Sora';font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .card .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--surf2),var(--bg));border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--brand);flex-shrink:0}
+  .card .guess{display:flex;align-items:center;gap:9px;font-family:'Sora';font-weight:800;font-size:28px}
+  .card .guess .cf{width:24px;height:16px;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08)}
+  .card .guess .x{color:var(--mut2);font-size:18px;font-weight:600}
+  .card .tag{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:999px;letter-spacing:.2px}
+  .t-crav{background:rgba(0,213,106,.12);color:var(--crav)}
+  .t-perto{background:rgba(255,176,32,.12);color:var(--perto)}
+  .t-errou{background:rgba(91,100,120,.15);color:var(--mut)}
+  .t-wait{background:var(--bg);color:var(--mut2);border:1px dashed var(--line)}
+  .card.crav{border-color:rgba(0,213,106,.4)}
+  .card.crav::before{content:"";position:absolute;inset:0;border-radius:16px;box-shadow:0 0 24px rgba(0,213,106,.1) inset;pointer-events:none}
+  .empty{color:var(--mut);text-align:center;grid-column:1/-1;padding:40px;font-size:14px}
+  footer{text-align:center;color:var(--mut2);font-size:11.5px;margin-top:40px;font-weight:500}
+  footer .adminlink{color:var(--mut2);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="flag-br" viewBox="0 0 28 20"><rect width="28" height="20" fill="#009b3a"/><polygon points="14,2 26,10 14,18 2,10" fill="#fedf00"/><circle cx="14" cy="10" r="4.2" fill="#002776"/><path d="M10 9.2 A 5 5 0 0 1 18 9.6" fill="none" stroke="#fff" stroke-width="0.9"/></symbol>
+    <symbol id="flag-jp" viewBox="0 0 28 20"><rect width="28" height="20" fill="#fff"/><circle cx="14" cy="10" r="5.6" fill="#bc002d"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><span class="ic">⚽</span> Bolão · Copa 2026</div>
+    <div class="live"><span class="pulse"></span> AO VIVO</div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-tag">
+      <span class="chip">Fase de 32 · 16 avos de final</span>
+      <span class="lockchip" id="lockChip">🔒 Placar oficial</span>
+    </div>
+    <div class="official-label">Placar oficial do jogo</div>
+    <div class="match">
+      <div class="team br"><svg class="flag-svg"><use href="#flag-br"/></svg><span class="nm">Brasil</span></div>
+      <div class="scoreblock">
+        <div class="scorenum locked" id="boxBr"><input id="realBr" type="number" min="0" placeholder="-" disabled></div>
+        <span class="dash">:</span>
+        <div class="scorenum locked" id="boxJp"><input id="realJp" type="number" min="0" placeholder="-" disabled></div>
+      </div>
+      <div class="team jp"><svg class="flag-svg"><use href="#flag-jp"/></svg><span class="nm">Japão</span></div>
+    </div>
+    <div class="adminbar" id="adminBar">
+      🔓 Modo admin ativo — você pode editar o placar oficial.
+      <button class="amber" onclick="salvarPlacar()">💾 Salvar placar</button>
+      <button class="ghost" onclick="sairAdmin()">Sair do admin</button>
+    </div>
+    <div class="hero-foot">
+      <b>Seg 29/06</b> · 14h Brasília · NRG Stadium, Houston
+      <span class="hint" id="heroHint">O placar é definido pela organização — aqui você só acompanha o resultado ao vivo.</span>
+    </div>
+  </div>
+
+  <div class="config">
+    <details>
+      <summary>⚙️ Configurar webhook do n8n</summary>
+      <input id="webhookUrl" value="https://n8n.grupoliveseo.com/webhook/bolao" placeholder="https://n8n.grupoliveseo.com/webhook/bolao">
+      <div class="hintcfg">Necessário apenas uma vez. Depois de publicado, todos já vêm configurados.</div>
+    </details>
+  </div>
+
+  <div class="sec"><span class="bar"></span><h2>Faça seu palpite</h2></div>
+  <div class="card-form">
+    <div class="form-head"><span class="pin">👇</span><h3><span class="seu">Seu palpite</span> — quanto vai ser o jogo?</h3></div>
+    <div class="form-grid">
+      <div class="field nome"><label>Seu nome</label><input id="nome" placeholder="Ex: Luana"></div>
+      <div class="teamtag"><svg class="flag-mini"><use href="#flag-br"/></svg> BRA</div>
+      <div class="field gol"><label>Gols</label><input id="apBr" type="number" min="0" placeholder="-"></div>
+      <span class="vs">:</span>
+      <div class="field gol"><label>Gols</label><input id="apJp" type="number" min="0" placeholder="-"></div>
+      <div class="teamtag">JPN <svg class="flag-mini"><use href="#flag-jp"/></svg></div>
+      <button onclick="registrar()" id="btnReg">Enviar palpite</button>
+    </div>
+    <div id="regMsg" class="msg"></div>
+  </div>
+
+  <div class="sec"><span class="bar"></span><h2>Quadro de palpites</h2>
+    <span style="margin-left:auto;font-size:11px;color:var(--mut2);font-weight:600">atualiza a cada 30s</span>
+    <button class="ghost" style="margin-left:10px" onclick="carregar()">↻ Atualizar</button>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="grupos">
+    <div class="gcol crav"><div class="ghead"><span class="gdot"></span>🎯 Cravou<span class="count" id="cCrav">0</span></div><ul id="gCrav"></ul></div>
+    <div class="gcol perto"><div class="ghead"><span class="gdot"></span>🔥 Ficou perto<span class="count" id="cPerto">0</span></div><ul id="gPerto"></ul></div>
+    <div class="gcol errou"><div class="ghead"><span class="gdot"></span>❌ Errou tudo<span class="count" id="cErrou">0</span></div><ul id="gErrou"></ul></div>
+  </div>
+
+  <div class="sec"><span class="bar"></span><h2>Todos os palpites</h2></div>
+  <div class="grid" id="grid"></div>
+</div>
+<footer>Bolão interno · liveSEO · backend n8n + Google Sheets · <span class="adminlink" onclick="entrarAdmin()">admin</span></footer>
+
+<script>
+const ADMIN_PASS='Live@2026**';            // senha de administrador
+const PLACAR_MARK='__PLACAR__';
+const LS_KEY='bolao_webhook_url';
+const LS_ADMIN='bolao_admin';
+const urlInput=document.getElementById('webhookUrl');
+const URL_PADRAO='https://n8n.grupoliveseo.com/webhook/bolao';
+try{const s=localStorage.getItem(LS_KEY);if(s)urlInput.value=s;}catch(e){}
+if(!urlInput.value) urlInput.value=URL_PADRAO;   // já vem preenchido pra todos
+function getUrl(){const u=urlInput.value.trim();try{localStorage.setItem(LS_KEY,u);}catch(e){}return u;}
+
+let isAdmin=false;
+try{ if(localStorage.getItem(LS_ADMIN)==='1') isAdmin=true; }catch(e){}
+// também aceita link secreto: ?admin=SENHA
+const params=new URLSearchParams(location.search);
+if(params.get('admin')===ADMIN_PASS){ isAdmin=true; try{localStorage.setItem(LS_ADMIN,'1');}catch(e){} }
+
+const LABEL={crav:'🎯 Cravou',perto:'🔥 Ficou perto',errou:'❌ Errou tudo',wait:'⏳ Aguardando'};
+const CLS={crav:'t-crav',perto:'t-perto',errou:'t-errou',wait:'t-wait'};
+const FBR='<svg class="cf"><use href="#flag-br"/></svg>';
+const FJP='<svg class="cf"><use href="#flag-jp"/></svg>';
+function inicial(n){return (n.trim()[0]||'?').toUpperCase();}
+
+function aplicarModoAdmin(){
+  const bar=document.getElementById('adminBar');
+  const br=document.getElementById('realBr'), jp=document.getElementById('realJp');
+  const boxBr=document.getElementById('boxBr'), boxJp=document.getElementById('boxJp');
+  const chip=document.getElementById('lockChip'), hint=document.getElementById('heroHint');
+  if(isAdmin){
+    bar.classList.add('on');
+    br.disabled=false; jp.disabled=false;
+    boxBr.classList.remove('locked'); boxBr.classList.add('editable');
+    boxJp.classList.remove('locked'); boxJp.classList.add('editable');
+    chip.innerHTML='🔓 Admin'; 
+    hint.textContent='Você está no modo admin: digite o placar e clique em Salvar placar para publicar a todos.';
+  }else{
+    bar.classList.remove('on');
+    br.disabled=true; jp.disabled=true;
+    boxBr.classList.add('locked'); boxBr.classList.remove('editable');
+    boxJp.classList.add('locked'); boxJp.classList.remove('editable');
+    chip.innerHTML='🔒 Placar oficial';
+    hint.textContent='O placar é definido pela organização — aqui você só acompanha o resultado ao vivo.';
+  }
+}
+function entrarAdmin(){
+  const p=prompt('Senha de administrador:');
+  if(p===null) return;
+  if(p===ADMIN_PASS){ isAdmin=true; try{localStorage.setItem(LS_ADMIN,'1');}catch(e){} aplicarModoAdmin(); }
+  else alert('Senha incorreta.');
+}
+function sairAdmin(){ isAdmin=false; try{localStorage.removeItem(LS_ADMIN);}catch(e){} aplicarModoAdmin(); }
+
+async function salvarPlacar(){
+  const url=getUrl();
+  const br=document.getElementById('realBr').value, jp=document.getElementById('realJp').value;
+  if(!url){alert('Configure a URL do webhook primeiro (⚙️).');return;}
+  if(br===''||jp===''){alert('Preencha os dois números do placar.');return;}
+  try{
+    await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nome:PLACAR_MARK,brasil:parseInt(br),japao:parseInt(jp)})});
+    pulseLive();
+    setTimeout(carregar,800);
+  }catch(e){alert('Erro ao salvar placar. Confira o webhook.');}
+}
+
+async function registrar(){
+  const url=getUrl();
+  const nome=document.getElementById('nome').value.trim();
+  const br=document.getElementById('apBr').value, jp=document.getElementById('apJp').value;
+  const msg=document.getElementById('regMsg');
+  if(!url){msg.className='msg err';msg.textContent='Configure a URL do webhook primeiro (⚙️).';return;}
+  if(!nome||br===''||jp===''){msg.className='msg err';msg.textContent='Preencha nome e os dois placares.';return;}
+  if(nome.trim()===PLACAR_MARK){msg.className='msg err';msg.textContent='Esse nome é reservado, escolha outro 😉';return;}
+  const btn=document.getElementById('btnReg');btn.disabled=true;btn.textContent='Enviando...';
+  try{
+    await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,brasil:parseInt(br),japao:parseInt(jp)})});
+    msg.className='msg ok';msg.textContent='✅ Palpite registrado! Boa sorte! 🍀';
+    document.getElementById('nome').value='';document.getElementById('apBr').value='';document.getElementById('apJp').value='';
+    setTimeout(carregar,800);
+  }catch(e){msg.className='msg err';msg.textContent='❌ Erro ao enviar. Confira a URL do webhook e o CORS.';}
+  finally{btn.disabled=false;btn.textContent='Enviar palpite';}
+}
+
+async function carregar(){
+  const url=getUrl();if(!url)return;
+  try{const res=await fetch(url,{method:'GET'});render(await res.json());}catch(e){console.error(e);}
+}
+
+function render(data){
+  const apostas=data.apostas||[];
+  const g=data.grupos||{cravou:[],ficouPerto:[],errouTudo:[]};
+  // placar oficial vindo da planilha — só preenche se o admin não estiver digitando agora
+  if(!isAdmin || !digitandoPlacar){
+    document.getElementById('realBr').value = (data.realBr!==null&&data.realBr!==undefined)?data.realBr:'';
+    document.getElementById('realJp').value = (data.realJp!==null&&data.realJp!==undefined)?data.realJp:'';
+  }
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="n" style="color:#fff">${data.total||apostas.length}</div><div class="l">Palpites</div></div>
+    <div class="stat"><div class="n" style="color:var(--crav)">${g.cravou.length}</div><div class="l">Cravaram</div></div>
+    <div class="stat"><div class="n" style="color:var(--perto)">${g.ficouPerto.length}</div><div class="l">Ficaram perto</div></div>
+    <div class="stat"><div class="n" style="color:var(--mut)">${g.errouTudo.length}</div><div class="l">Erraram</div></div>`;
+  document.getElementById('cCrav').textContent=g.cravou.length;
+  document.getElementById('cPerto').textContent=g.ficouPerto.length;
+  document.getElementById('cErrou').textContent=g.errouTudo.length;
+  fillList('gCrav',g.cravou);fillList('gPerto',g.ficouPerto);fillList('gErrou',g.errouTudo);
+  const grid=document.getElementById('grid');
+  if(!apostas.length){grid.innerHTML='<div class="empty">Nenhum palpite ainda. Seja o primeiro a entrar em campo! ⚽</div>';return;}
+  grid.innerHTML=apostas.map(p=>`
+    <div class="card ${p.status==='crav'?'crav':''}">
+      <div class="name"><span class="av">${esc(inicial(p.nome))}</span>${esc(p.nome)}</div>
+      <div class="guess">${FBR}<span>${p.brasil}</span><span class="x">:</span><span>${p.japao}</span>${FJP}</div>
+      <span class="tag ${CLS[p.status]}">${LABEL[p.status]}</span>
+    </div>`).join('');
+}
+function fillList(id,arr){const el=document.getElementById(id);el.innerHTML=arr.length?arr.map(n=>`<li>${esc(n)}</li>`).join(''):'<li class="vazio">— ninguém ainda —</li>';}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function pulseLive(){const dot=document.querySelector('.live .pulse');if(dot){dot.style.background='#00d56a';setTimeout(()=>{dot.style.background='#ff4d5e';},600);}}
+
+// auto-refresh inteligente
+let digitando=false, ultimoFoco=0, digitandoPlacar=false;
+['nome','apBr','apJp','webhookUrl'].forEach(id=>{const el=document.getElementById(id);
+  el.addEventListener('focus',()=>{digitando=true;});
+  el.addEventListener('blur',()=>{digitando=false;ultimoFoco=Date.now();});});
+['realBr','realJp'].forEach(id=>{const el=document.getElementById(id);
+  el.addEventListener('focus',()=>{digitando=true;digitandoPlacar=true;});
+  el.addEventListener('blur',()=>{digitando=false;digitandoPlacar=false;ultimoFoco=Date.now();});});
+function podeAtualizar(){return !digitando && (Date.now()-ultimoFoco>4000);}
+setInterval(()=>{ if(podeAtualizar()){ carregar(); pulseLive(); } }, 30000);
+
+aplicarModoAdmin();
+carregar();
+</script>
+</body>
+</html>
