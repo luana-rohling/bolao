@@ -163,7 +163,7 @@
     </div>
   </div>
 
-  <div class="config">
+  <div class="config" id="cfgBlock" style="display:none">
     <details>
       <summary>⚙️ Configurar webhook do n8n</summary>
       <input id="webhookUrl" value="https://n8n.grupoliveseo.com/webhook/bolao" placeholder="https://n8n.grupoliveseo.com/webhook/bolao">
@@ -200,7 +200,7 @@
   <div class="sec"><span class="bar"></span><h2>Todos os palpites</h2></div>
   <div class="grid" id="grid"></div>
 </div>
-<footer>Bolão interno · liveSEO · <span class="adminlink" onclick="entrarAdmin()">admin</span></footer>
+<footer>Bolão interno · liveSEO · backend n8n + Google Sheets · <span class="adminlink" onclick="entrarAdmin()">admin</span></footer>
 
 <script>
 const ADMIN_PASS='Live@2026**';            // senha de administrador
@@ -230,8 +230,10 @@ function aplicarModoAdmin(){
   const br=document.getElementById('realBr'), jp=document.getElementById('realJp');
   const boxBr=document.getElementById('boxBr'), boxJp=document.getElementById('boxJp');
   const chip=document.getElementById('lockChip'), hint=document.getElementById('heroHint');
+  const cfg=document.getElementById('cfgBlock');
   if(isAdmin){
     bar.classList.add('on');
+    if(cfg) cfg.style.display='block';
     br.disabled=false; jp.disabled=false;
     boxBr.classList.remove('locked'); boxBr.classList.add('editable');
     boxJp.classList.remove('locked'); boxJp.classList.add('editable');
@@ -239,6 +241,7 @@ function aplicarModoAdmin(){
     hint.textContent='Você está no modo admin: digite o placar e clique em Salvar placar para publicar a todos.';
   }else{
     bar.classList.remove('on');
+    if(cfg) cfg.style.display='none';
     br.disabled=true; jp.disabled=true;
     boxBr.classList.add('locked'); boxBr.classList.remove('editable');
     boxJp.classList.add('locked'); boxJp.classList.remove('editable');
