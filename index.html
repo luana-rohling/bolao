@@ -128,6 +128,12 @@
   <defs>
     <symbol id="flag-br" viewBox="0 0 28 20"><rect width="28" height="20" fill="#009b3a"/><polygon points="14,2 26,10 14,18 2,10" fill="#fedf00"/><circle cx="14" cy="10" r="4.2" fill="#002776"/><path d="M10 9.2 A 5 5 0 0 1 18 9.6" fill="none" stroke="#fff" stroke-width="0.9"/></symbol>
     <symbol id="flag-jp" viewBox="0 0 28 20"><rect width="28" height="20" fill="#fff"/><circle cx="14" cy="10" r="5.6" fill="#bc002d"/></symbol>
+    <!-- Noruega -->
+    <symbol id="flag-no" viewBox="0 0 28 20"><rect width="28" height="20" fill="#ba0c2f"/><rect x="8" width="4" height="20" fill="#fff"/><rect y="8" width="28" height="4" fill="#fff"/><rect x="9" width="2" height="20" fill="#00205b"/><rect y="9" width="28" height="2" fill="#00205b"/></symbol>
+    <!-- Costa do Marfim -->
+    <symbol id="flag-ci" viewBox="0 0 28 20"><rect width="9.33" height="20" fill="#f77f00"/><rect x="9.33" width="9.33" height="20" fill="#fff"/><rect x="18.66" width="9.34" height="20" fill="#009e60"/></symbol>
+    <!-- Adversário a definir -->
+    <symbol id="flag-tbd" viewBox="0 0 28 20"><rect width="28" height="20" fill="#1b2030"/><text x="14" y="14.5" font-family="Sora,sans-serif" font-size="11" font-weight="800" fill="#5b6478" text-anchor="middle">?</text></symbol>
   </defs>
 </svg>
 
@@ -139,7 +145,7 @@
 
   <div class="hero">
     <div class="hero-tag">
-      <span class="chip">Fase de 32 · 16 avos de final</span>
+      <span class="chip" id="faseChip">Oitavas de final</span>
       <span class="lockchip" id="lockChip">🔒 Placar oficial</span>
     </div>
     <div class="official-label">Placar oficial do jogo</div>
@@ -150,7 +156,7 @@
         <span class="dash">:</span>
         <div class="scorenum locked" id="boxJp"><input id="realJp" type="number" min="0" placeholder="-" disabled></div>
       </div>
-      <div class="team jp"><svg class="flag-svg"><use href="#flag-jp"/></svg><span class="nm">Japão</span></div>
+      <div class="team jp"><svg class="flag-svg"><use href="#flag-no" id="advFlagBig"/></svg><span class="nm" id="advNome">Adversário</span></div>
     </div>
     <div class="adminbar" id="adminBar">
       🔓 Modo admin ativo — você pode editar o placar oficial.
@@ -158,7 +164,7 @@
       <button class="ghost" onclick="sairAdmin()">Sair do admin</button>
     </div>
     <div class="hero-foot">
-      <b>Seg 29/06</b> · 14h Brasília · NRG Stadium, Houston
+      <b id="jogoData">Data</b> <span id="jogoLocal"></span>
       <span class="hint" id="heroHint">O placar é definido pela organização — aqui você só acompanha o resultado ao vivo.</span>
     </div>
   </div>
@@ -180,7 +186,7 @@
       <div class="field gol"><label>Gols</label><input id="apBr" type="number" min="0" placeholder="-"></div>
       <span class="vs">:</span>
       <div class="field gol"><label>Gols</label><input id="apJp" type="number" min="0" placeholder="-"></div>
-      <div class="teamtag">JPN <svg class="flag-mini"><use href="#flag-jp"/></svg></div>
+      <div class="teamtag"><span id="advSigla">ADV</span> <svg class="flag-mini"><use href="#flag-no" id="advFlagMini"/></svg></div>
       <button onclick="registrar()" id="btnReg">Enviar palpite</button>
     </div>
     <div id="regMsg" class="msg"></div>
@@ -203,6 +209,35 @@
 <footer>Bolão interno · liveSEO · backend n8n + Google Sheets · <span class="adminlink" onclick="entrarAdmin()">admin</span></footer>
 
 <script>
+/* ============================================================
+   ⚙️  CONFIGURAÇÃO DO JOGO — mude só aqui a cada nova fase
+   ------------------------------------------------------------
+   advFlag: id da bandeira já incluída nos <defs> acima.
+     Disponíveis: 'flag-no' (Noruega), 'flag-ci' (Costa do Marfim),
+     'flag-jp' (Japão), 'flag-tbd' (a definir / interrogação).
+   Para um time novo, me peça a bandeira que eu adiciono.
+============================================================ */
+const JOGO = {
+  fase:    'Oitavas de final',
+  advNome: 'Noruega',
+  advSigla:'NOR',
+  advFlag: 'flag-no',
+  data:    'Dom 05/07',
+  local:   '· 17h Brasília · Nova Jersey'
+};
+/* ============================================================ */
+
+function aplicarJogo(){
+  document.getElementById('faseChip').textContent = JOGO.fase;
+  document.getElementById('advNome').textContent = JOGO.advNome;
+  document.getElementById('advSigla').textContent = JOGO.advSigla;
+  document.getElementById('jogoData').textContent = JOGO.data;
+  document.getElementById('jogoLocal').textContent = JOGO.local;
+  document.getElementById('advFlagBig').setAttribute('href', '#'+JOGO.advFlag);
+  document.getElementById('advFlagMini').setAttribute('href', '#'+JOGO.advFlag);
+  document.title = 'Bolão · Brasil x '+JOGO.advNome;
+}
+
 const ADMIN_PASS='Live@2026**';            // senha de administrador
 const PLACAR_MARK='__PLACAR__';
 const LS_KEY='bolao_webhook_url';
@@ -222,7 +257,7 @@ if(params.get('admin')===ADMIN_PASS){ isAdmin=true; try{localStorage.setItem(LS_
 const LABEL={crav:'🎯 Cravou',perto:'🔥 Ficou perto',errou:'❌ Errou tudo',wait:'⏳ Aguardando'};
 const CLS={crav:'t-crav',perto:'t-perto',errou:'t-errou',wait:'t-wait'};
 const FBR='<svg class="cf"><use href="#flag-br"/></svg>';
-const FJP='<svg class="cf"><use href="#flag-jp"/></svg>';
+function FADV(){return '<svg class="cf"><use href="#'+JOGO.advFlag+'"/></svg>';}
 function inicial(n){return (n.trim()[0]||'?').toUpperCase();}
 
 function aplicarModoAdmin(){
@@ -315,7 +350,7 @@ function render(data){
   grid.innerHTML=apostas.map(p=>`
     <div class="card ${p.status==='crav'?'crav':''}">
       <div class="name"><span class="av">${esc(inicial(p.nome))}</span>${esc(p.nome)}</div>
-      <div class="guess">${FBR}<span>${p.brasil}</span><span class="x">:</span><span>${p.japao}</span>${FJP}</div>
+      <div class="guess">${FBR}<span>${p.brasil}</span><span class="x">:</span><span>${p.japao}</span>${FADV()}</div>
       <span class="tag ${CLS[p.status]}">${LABEL[p.status]}</span>
     </div>`).join('');
 }
@@ -334,6 +369,7 @@ let digitando=false, ultimoFoco=0, digitandoPlacar=false;
 function podeAtualizar(){return !digitando && (Date.now()-ultimoFoco>4000);}
 setInterval(()=>{ if(podeAtualizar()){ carregar(); pulseLive(); } }, 30000);
 
+aplicarJogo();
 aplicarModoAdmin();
 carregar();
 </script>
